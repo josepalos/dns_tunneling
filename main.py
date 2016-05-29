@@ -41,11 +41,11 @@ class DnsMessage:
 
     def pack(self):
         flags = DnsMessage.pack_flags(self.qr, self.opcode, self.aa, self.tc, self.rd, self.ra, self.rcode)
-        return struct.pack("!HHHHHH", self.dns_id, flags, self.qdcount, self.ancount, self.nscount, self.arcount)
+        return struct.pack("!LLLLLL", self.dns_id, flags, self.qdcount, self.ancount, self.nscount, self.arcount)
 
     @staticmethod
     def unpack(data):
-        (dns_id, flags, qdcount, ancount, nscount, arcount) = struct.unpack("!HHHHHH", data)
+        (dns_id, flags, qdcount, ancount, nscount, arcount) = struct.unpack("!LLLLLL", data)
         (qr, opcode, aa, tc, rd, ra, rcode) = DnsMessage.unpack_flags(flags)
         return DnsMessage(dns_id, qr, opcode, aa, tc, rd, ra, rcode, qdcount, ancount, nscount, arcount)
 

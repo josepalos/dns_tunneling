@@ -2,6 +2,8 @@ from unittest import TestCase
 
 from main import DnsMessage
 
+import struct
+
 
 class TestPackFlags(TestCase):
     def test(self):
@@ -39,3 +41,19 @@ class TestCreateAndUnpackFlags(TestCase):
         expected = (qr, opcode, aa, tc, rd, ra, rcode)
 
         self.assertEquals(expected, DnsMessage.unpack_flags(DnsMessage.pack_flags(qr, opcode, aa, tc, rd, ra, rcode)))
+
+
+class TestPackDnsMessage(TestCase):
+    def test(self):
+        message = DnsMessage(1234, 1, DnsMessage.OPCODE_NOTIFY, 0, 0, 0, 0, DnsMessage.RCODE_FORMAT_ERROR, 3, 4, 5, 6)
+        packed = message.pack()
+        identifier = 0b0000010011010010
+        flags = 0b1010000000000001
+        question_count = 0b0000000000000011
+        answer_count = 0b0000000000000100
+        nameserver_count = 0b0000000000000101
+        authority_count = 0b0000000000000110
+        expected = struct.pack("!LLLLLL", identifier, flags, question_count, answer_count, nameserver_count,
+                               authority_count)
+
+        self.assertEquals(expected, packed);
