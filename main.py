@@ -57,7 +57,7 @@ class DnsMessage:
         tc = (flags >> 9) & 0b1
         rd = (flags >> 8) & 0b1
         ra = (flags >> 7) & 0b1
-        rcode = flags & 0b111
+        rcode = flags & 0b1111
 
         return (qr, opcode, aa, tc, rd, ra, rcode)
 
