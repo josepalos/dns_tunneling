@@ -40,7 +40,7 @@ class DnsMessage:
         self.arcount = arcount  # Number of resource records in the Additional section.
 
     def pack(self):
-        flags = DnsMessage.create_flags(self.qr, self.opcode, self.aa, self.tc, self.rd, self.ra, self.rcode)
+        flags = DnsMessage.pack_flags(self.qr, self.opcode, self.aa, self.tc, self.rd, self.ra, self.rcode)
         return struct.pack("!HHHHHH", self.dns_id, flags, self.qdcount, self.ancount, self.nscount, self.arcount)
 
     @staticmethod
@@ -62,7 +62,7 @@ class DnsMessage:
         return (qr, opcode, aa, tc, rd, ra, rcode)
 
     @staticmethod
-    def create_flags(qr, opcode, aa, tc, rd, ra, rcode):
+    def pack_flags(qr, opcode, aa, tc, rd, ra, rcode):
         return (qr << 15) | (opcode << 11) | (aa << 10) | (tc << 9) | (rd << 8) | (ra << 7) | (0b000 << 4) | rcode
 
 
