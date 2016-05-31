@@ -1,11 +1,11 @@
-from unittest import TestCase
+import unittest
 
-from main import DnsMessage
+from dns_tunneling.main import DnsMessage
 
 import struct
 
 
-class TestPackFlags(TestCase):
+class TestPackFlags(unittest.TestCase):
     def test(self):
         qr = 0x0
         opcode = DnsMessage.OPCODE_QUERY
@@ -21,14 +21,14 @@ class TestPackFlags(TestCase):
         self.assertEquals(expected, flags, "Expected %s but found %s" % (bin(expected), bin(flags)))
 
 
-class TestUnpackFlags(TestCase):
+class TestUnpackFlags(unittest.TestCase):
     def test(self):
         expected = (0b1, 0b0101, 0b0, 0b1, 0b0, 0b1, 0b1111)
         flags = DnsMessage.unpack_flags(0b1010101010001111)
         self.assertEquals(expected, flags)
 
 
-class TestCreateAndUnpackFlags(TestCase):
+class TestCreateAndUnpackFlags(unittest.TestCase):
     def test(self):
         qr = 0x0
         opcode = DnsMessage.OPCODE_QUERY
@@ -43,7 +43,7 @@ class TestCreateAndUnpackFlags(TestCase):
         self.assertEquals(expected, DnsMessage.unpack_flags(DnsMessage.pack_flags(qr, opcode, aa, tc, rd, ra, rcode)))
 
 
-class TestPackDnsMessage(TestCase):
+class TestPackDnsMessage(unittest.TestCase):
     def test(self):
         message = DnsMessage(1234, 1, DnsMessage.OPCODE_NOTIFY, 0, 0, 0, 0, DnsMessage.RCODE_FORMAT_ERROR, 3, 4, 5, 6)
         packed = message.pack()
@@ -57,3 +57,8 @@ class TestPackDnsMessage(TestCase):
                                authority_count)
 
         self.assertEquals(expected, packed);
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(unittest.main())
