@@ -68,10 +68,21 @@ class DnsMessage:
 
 class DnsService:
     def __init__(self):
-        pass
+        self.names = {}
+        self.reverse_names = {}
 
     def run(self):
         pass
+
+    def register_entry(self, name, ip):
+        self.names[name] = ip
+        self.reverse_names[ip] = name
+
+    def get_ip(self, name):
+        return self.names.get(name)
+
+    def get_reverse(self, ip):
+        return self.reverse_names.get(ip)
 
 
 def start_service():
