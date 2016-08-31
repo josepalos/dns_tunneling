@@ -1,7 +1,7 @@
 import struct
 
 
-class DnsMessage:
+class DnsMessageHeader:
     OPCODE_QUERY = 0
     OPCODE_IQUERY = 1
     OPCODE_STATUS = 2
@@ -40,14 +40,14 @@ class DnsMessage:
         self.arcount = arcount  # Number of resource records in the Additional section.
 
     def pack(self):
-        flags = DnsMessage.pack_flags(self.qr, self.opcode, self.aa, self.tc, self.rd, self.ra, self.rcode)
+        flags = DnsMessageHeader.pack_flags(self.qr, self.opcode, self.aa, self.tc, self.rd, self.ra, self.rcode)
         return struct.pack("!LLLLLL", self.dns_id, flags, self.qdcount, self.ancount, self.nscount, self.arcount)
 
     @staticmethod
     def unpack(data):
         (dns_id, flags, qdcount, ancount, nscount, arcount) = struct.unpack("!LLLLLL", data)
-        (qr, opcode, aa, tc, rd, ra, rcode) = DnsMessage.unpack_flags(flags)
-        return DnsMessage(dns_id, qr, opcode, aa, tc, rd, ra, rcode, qdcount, ancount, nscount, arcount)
+        (qr, opcode, aa, tc, rd, ra, rcode) = DnsMessageHeader.unpack_flags(flags)
+        return DnsMessageHeader(dns_id, qr, opcode, aa, tc, rd, ra, rcode, qdcount, ancount, nscount, arcount)
 
     @staticmethod
     def unpack_flags(flags):
@@ -66,12 +66,43 @@ class DnsMessage:
         return (qr << 15) | (opcode << 11) | (aa << 10) | (tc << 9) | (rd << 8) | (ra << 7) | (0b000 << 4) | rcode
 
 
+class DnsMessage:
+    def __init__(self, headers, questions, answers, authority, additional):
+        self.headers = headers
+        self.questions = questions
+        self.answers = answers
+        self.authority = authority
+        self.additional = additional
+
+    def isQuery(self):
+        return self.headers.qr == 0
+
+    def pack(self):
+        pass
+
+    @staticmethod
+    def unpack(data):
+        pass
+
+
 class DnsService:
     def __init__(self):
         self.names = {}
         self.reverse_names = {}
 
     def run(self):
+        pass
+        while True:
+            data = self.read_data()
+            self.process_query(self.parse_query(data))
+
+    def read_data(self):
+        pass
+
+    def parse_query(self, data):
+        pass
+
+    def process_query(self, query):
         pass
 
     def register_entry(self, name, ip):
@@ -86,6 +117,7 @@ class DnsService:
 
 
 def start_service():
+    # TODO load config and data from files...
     return DnsService()
 
 
