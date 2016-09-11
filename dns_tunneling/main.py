@@ -114,7 +114,11 @@ class DnsMessage:
         return self.headers.qr == 0
 
     def pack(self):
-        pass
+        return self.headers.pack + \
+               ''.join([i.pack() for i in self.questions]) + \
+               ''.join([i.pack() for i in self.answers]) + \
+               ''.join([i.pack() for i in self.authority]) + \
+               ''.join([i.pack() for i in self.additional])
 
     @staticmethod
     def unpack(data):
