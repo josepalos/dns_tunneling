@@ -2,15 +2,17 @@ import struct
 import socket
 
 
+def print_hex(string):
+    print ':'.join(x.encode('hex') for x in string)
+
+
 def parse_qname(data):
     data.strip('\0')
     labels = []
     while data is not "":
         size = ord(data[0])
-        l = data[1:size + 1]
-        labels.append(l)
+        labels.append(data[1:size + 1])
         data = data[size + 1:]
-        print "Found label <%s>. Data is <%s>" % (l, data)
 
 
     return labels
@@ -79,7 +81,7 @@ class DnsMessageHeader:
 
     @staticmethod
     def unpack(data):
-        (dns_id, flags, qdcount, ancount, nscount, arcount) = struct.unpack("!LLLLLL", data)
+        (dns_id, flags, qdcount, ancount, nscount, arcount) = struct.unpack("!HHHHHH", data)
         (qr, opcode, aa, tc, rd, ra, rcode) = DnsMessageHeader.unpack_flags(flags)
         return DnsMessageHeader(dns_id, qr, opcode, aa, tc, rd, ra, rcode, qdcount, ancount, nscount, arcount)
 
@@ -116,8 +118,19 @@ class DnsMessage:
 
     @staticmethod
     def unpack(data):
-        pass
+        raw_headers = data[:12]
+        data = data[12:]
+        headers = DnsMessageHeader.unpack(raw_headers)
 
+        questions = []
+        for i in range(0, headers.qdcount):
+            # each question is from 0 to first ocurrence of NULL-character plus 32 bits.
+            size = data.index('\x00') + 4 + 1  # Add one because index starts with 0.
+            raw_question = data[:size]
+            data = data[size:]
+            questions.append(Question.unpack(raw_question))
+
+        return DnsMessage(headers, questions, [], [], [])
 
 class Question:
     def __init__(self, qname, qtype, qclass):
