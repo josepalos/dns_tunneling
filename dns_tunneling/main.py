@@ -1,14 +1,17 @@
 import struct
+import socket
 
 
 def parse_qname(data):
+    data.strip('\0')
     labels = []
-    size = ord(data[0])
-
-    while size is not 0:
-        labels.append(data[1:size + 1])
-        data = data[size + 1:]
+    while data is not "":
         size = ord(data[0])
+        l = data[1:size + 1]
+        labels.append(l)
+        data = data[size + 1:]
+        print "Found label <%s>. Data is <%s>" % (l, data)
+
 
     return labels
 
