@@ -1,6 +1,37 @@
 import struct
 
 
+def parse_qname(data):
+    labels = []
+    size = ord(data[0])
+
+    while size is not 0:
+        labels.append(data[1:size + 1])
+        data = data[size + 1:]
+        size = ord(data[0])
+
+    return labels
+
+
+qtype_names = {
+    1: "A",
+    2: "NS",
+    5: "CNAME",
+    6: "SOA",
+    11: "WKS",
+    12: "PTR",
+    15: "MX",
+    33: "SRV",
+    28: "AAAA",
+    255: "--ANY--",
+}
+
+qclass_names = {
+    1: "IN",
+}
+
+
+
 class DnsMessageHeader:
     OPCODE_QUERY = 0
     OPCODE_IQUERY = 1
@@ -85,6 +116,35 @@ class DnsMessage:
         pass
 
 
+class Question:
+    def __init__(self, qname, qtype, qclass):
+        self.qname = qname
+        self.qtype = qtype
+        self.qclass = qclass
+
+    @staticmethod
+    def unpack(data):
+        splited_data = data.split('\x00')
+        raw_qname = splited_data[0]
+        data = data[len(raw_qname) + 1:]
+        qtype = sum([ord(i) for i in data[:2]])
+        data = data[2:]
+        qclass = sum([ord(i) for i in data])
+
+        return Question(parse_qname(raw_qname), qtype, qclass)
+
+    def pack_qname(self):
+        raw = ""
+        for label in self.qname:
+            raw += chr(len(label)) + label
+        raw += '\x00'
+        return raw
+
+
+    def pack(self):
+        return self.pack_qname() + unichr(self.qtype) + unichr(self.qclass)
+
+
 class DnsService:
     def __init__(self):
         self.names = {}
@@ -103,7 +163,11 @@ class DnsService:
         pass
 
     def process_query(self, query):
-        pass
+        questions = query.questions
+        for q in questions:
+            # TODO: ----from here----
+            print "Asked for '%s' (type: '%s') named '%s'" % \
+                (query.qtype, query.qclass, query.qname)
 
     def register_entry(self, name, ip):
         self.names[name] = ip
